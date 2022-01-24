@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <style>
+        body {
+            margin-top: 20px;
+            background: #f8f8f8
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row flex-lg-nowrap">
+        <div class="col">
+            <div class="e-tabs mb-3 px-3">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item"><a class="nav-link active" href="home.html">Customer</a></li>
+                </ul>
+            </div>
+
+            <div class="row flex-lg-nowrap">
+                <div class="col mb-3">
+                    <div class="e-panel card">
+                        <div class="card-body">
+                            <div class="card-title">
+                                <h6 class="mr-2"><span>David Duc Thang</span><small class="px-1">Be a wise leader</small></h6>
+                            </div>
+                            <div class="e-table">
+                                <div class="table-responsive table-lg mt-3">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th class="align-top">#</th>
+                                            <th class="max-width">Name</th>
+                                            <th class="sortable">Image</th>
+                                            <th class="sortable">Categories</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="tbody">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-3 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-center px-xl-3">
+                                <a href="createCustomer.html" class="btn btn-success btn-block">New Customer
+                                </a>
+                            </div>
+                            <hr class="my-3">
+                            <div>
+                                <div class="form-group">
+                                    <label>Search by Name:</label>
+                                    <div><input class="form-control w-100" type="text" placeholder="Name" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- User Form Modal -->
+        </div>
+    </div>
+    <!-- Modal Delete -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <input id="id" hidden/>
+                    Bạn có chắc là muốn xoá <input class="border-0" id="name"/> không ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="deleteCustomer()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    function showCustomer() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/customers",
+            //Xử lý thành công
+            success: function (data) {
+                let str = "";
+
+                for (let i = 0; i < data.length; i++) {
+                    str += "<tr>"
+                    str += `<td>${data[i].id}</td>`
+                    str += `<td>${data[i].nameCustomer}</td>`
+                    str += `<td><img src="${data[i].image}" height="220" width="200"></td>`
+                    str += `<td>${data[i].categories.nameCategories}</td>`
+                    str += `<td><a class="btn btn-sm btn-outline-secondary badge" href="editCustomer.html?id=${data[i].id}">Edit</a>
+                                <button onclick="modalDelete(${data[i].id})" class="btn btn-sm btn-outline-secondary badge"
+                                                            type="button"  data-toggle="modal" data-target="#exampleModal"><i class="fa fa-trash"></i></button></td>`
+                    str += "</tr>"
+                }
+                document.getElementById("tbody").innerHTML = str;
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+    showCustomer();
+
+    function modalDelete(id) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/customers/" + id,
+            //xử lý khi thành công
+            success: function (data) {
+                document.getElementById("id").value = data.id;
+                document.getElementById("name").value = data.nameCustomer;
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+    
+    function deleteCustomer() {
+        let id = document.getElementById("id").value;
+
+        $.ajax({
+            type: "DELETE",
+            url: `http://localhost:8080/customers/${id}`,
+            //Xử lý thành công
+            success: function () {
+                showCustomer()
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+</script>

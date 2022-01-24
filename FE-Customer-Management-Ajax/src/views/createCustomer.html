@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Customer</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+</head>
+<body>
+<div class="modal-header">
+    <h5 class="modal-title">Create Customer</h5>
+</div>
+<div class="modal-body">
+    <div class="py-1">
+        <form class="form" novalidate="">
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input class="form-control" placeholder="Enter a Name" id="name"/>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label id="imgDiv">Image</label>
+                                <progress value="0" max="100" id="uploader">0%</progress>
+                                <input type="file" value="upload" accept=".jpg" id="fileButton" >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="idCategories">Categories</label>
+                        <input class="form-control" placeholder="Enter a Categories" id="idCategories"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col d-flex justify-content-end">
+                    <a class="btn btn-primary" href="home.html" onclick="createCustomer()">Save Changes</a>
+                    <a href="home.html" class="btn btn-secondary">Back to list</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    let image1 = '';
+    let fbBucketName = 'images';
+
+    let uploader = document.getElementById('uploader');
+    let fileButton = document.getElementById('fileButton');
+
+    fileButton.addEventListener('change', function (e) {
+
+        console.log('file upload event', e);
+
+        let file = e.target.files[0];
+
+        let storageRef = firebase.storage().ref(`${fbBucketName}/${file.name}`);
+
+        let uploadTask = storageRef.put(file);
+
+        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+            function (snapshot) {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                uploader.value = progress;
+                console.log('Upload is ' + progress + '% done');
+                switch (snapshot.state) {
+                    case firebase.storage.TaskState.PAUSED:
+                        console.log('Upload is paused');
+                        break;
+                    case firebase.storage.TaskState.RUNNING:
+                        console.log('Upload is running');
+                        break;
+                }
+            }, function (error) {
+                switch (error.code) {
+                    case 'storage/unauthorized':
+                        break;
+
+                    case 'storage/canceled':
+                        break;
+
+                    case 'storage/unknown':
+                        break;
+                }
+            }, function () {
+                let downloadURL = uploadTask.snapshot.downloadURL;
+                image1 = downloadURL;
+                console.log('downloadURL ===>', downloadURL);
+                // let divLocation = document.getElementById("imgDiv");
+                let imgElement = document.createElement("img");
+                imgElement.src = downloadURL
+                console.log('pic ==', image1)
+                divLocation.append(imgElement);
+            });
+
+    });
+    function createCustomer() {
+        let customer = {
+            nameCustomer : document.getElementById("name").value,
+            image : image1,
+            categories : {idCategories : document.getElementById("idCategories").value}
+        }
+
+        $.ajax({
+            type: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            url: "http://localhost:8080/customers",
+            data: JSON.stringify(customer),
+            //Xử lý thành công
+            success: function () {
+                showCustomer()
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    //BE SURE TO PROTECT EVERYTHING IN THE CONFIG
+    //DON'T COMMIT IT!!!
+
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRUkgz07EeDqrlR93Zgaqo-_6PXOs59sA",
+        authDomain: "ducthang-ae432.firebaseapp.com",
+        databaseURL: "https://ducthang-ae432-default-rtdb.firebaseio.com",
+        projectId: "ducthang-ae432",
+        storageBucket: "ducthang-ae432.appspot.com",
+        messagingSenderId: "808201087012",
+        appId: "1:808201087012:web:72b12d3a413494610e50b1",
+        measurementId: "G-DF3E1709M4"
+    };
+    firebase.initializeApp(firebaseConfig);
+</script>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Customer</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+</head>
+<body>
+<div class="modal-header">
+    <h5 class="modal-title">Edit Customer</h5>
+</div>
+<div class="modal-body">
+    <div class="py-1">
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <input class="form-control" id="id" hidden/>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input class="form-control" placeholder="Enter a Name" id="name"/>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="image">Image</label>
+                                <input class="form-control" placeholder="Enter a Image" id="image"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="idCategories">Categories</label>
+                        <input class="form-control" placeholder="Enter a Categories" id="idCategories"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col d-flex justify-content-end">
+                    <a href="home.html" class="btn btn-primary" onclick="editCustomer()">Save Changes</a>
+                    <a href="home.html" class="btn btn-secondary">Back to list</a>
+                </div>
+            </div>
+    </div>
+</div>
+</body>
+<script>
+    //Get cai id tren url
+    let url_string = window.location.href;
+    let url = new URL(url_string);
+    let id = url.searchParams.get("id");
+    showEdit()
+
+    function showEdit() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/customers/" + id,
+            //xử lý khi thành công
+            success: function (data) {
+                document.getElementById("id").value = data.id;
+                document.getElementById("name").value = data.nameCustomer;
+                document.getElementById("image").value = data.image;
+                document.getElementById("idCategories").value = data.categories.idCategories;
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function editCustomer() {
+        let customer = {
+            id : document.getElementById("id").value,
+            nameCustomer : document.getElementById("name").value,
+            image : document.getElementById("image").value,
+            categories : {idCategories : document.getElementById("idCategories").value}
+        }
+
+        $.ajax({
+            type: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            url: "http://localhost:8080/customers/" + customer.id,
+            data: JSON.stringify(customer),
+            //Xử lý thành công
+            success: function () {
+                showCustomer()
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+</script>
+</html>
