@@ -53,8 +53,8 @@
             </div>
             <div class="row">
                 <div class="col d-flex justify-content-end">
-                    <a class="btn btn-primary" href="home.html" onclick="createCustomer()">Save Changes</a>
-                    <a href="home.html" class="btn btn-secondary">Back to list</a>
+                    <a class="btn btn-primary" href="index.html" onclick="createCustomer()">Save Changes</a>
+                    <a href="index.html" class="btn btn-secondary">Back to list</a>
                 </div>
             </div>
         </form>
@@ -62,6 +62,19 @@
 </div>
 </body>
 <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRUkgz07EeDqrlR93Zgaqo-_6PXOs59sA",
+        authDomain: "ducthang-ae432.firebaseapp.com",
+        databaseURL: "https://ducthang-ae432-default-rtdb.firebaseio.com",
+        projectId: "ducthang-ae432",
+        storageBucket: "ducthang-ae432.appspot.com",
+        messagingSenderId: "808201087012",
+        appId: "1:808201087012:web:72b12d3a413494610e50b1",
+        measurementId: "G-DF3E1709M4"
+    };
+    firebase.initializeApp(firebaseConfig);
+
     let image1 = '';
     let fbBucketName = 'images';
 
@@ -114,6 +127,7 @@
             });
 
     });
+
     function createCustomer() {
         let customer = {
             nameCustomer : document.getElementById("name").value,
@@ -138,21 +152,5 @@
             }
         })
     }
-
-    //BE SURE TO PROTECT EVERYTHING IN THE CONFIG
-    //DON'T COMMIT IT!!!
-
-    // Initialize Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyCRUkgz07EeDqrlR93Zgaqo-_6PXOs59sA",
-        authDomain: "ducthang-ae432.firebaseapp.com",
-        databaseURL: "https://ducthang-ae432-default-rtdb.firebaseio.com",
-        projectId: "ducthang-ae432",
-        storageBucket: "ducthang-ae432.appspot.com",
-        messagingSenderId: "808201087012",
-        appId: "1:808201087012:web:72b12d3a413494610e50b1",
-        measurementId: "G-DF3E1709M4"
-    };
-    firebase.initializeApp(firebaseConfig);
 </script>
 </html>
