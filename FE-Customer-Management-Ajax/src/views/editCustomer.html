@@ -17,6 +17,7 @@
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
 </head>
 <body>
 <div class="modal-header">
@@ -24,41 +25,109 @@
 </div>
 <div class="modal-body">
     <div class="py-1">
-            <div class="row">
-                <div class="col">
-                    <div class="row">
-                        <input class="form-control" id="id" hidden/>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="name">Name</label>
-                                <input class="form-control" placeholder="Enter a Name" id="name"/>
-                            </div>
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <input class="form-control" id="id" hidden/>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input class="form-control" placeholder="Enter a Name" id="name"/>
                         </div>
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="image">Image</label>
-                                <input class="form-control" placeholder="Enter a Image" id="image"/>
-                            </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input class="form-control" placeholder="Enter a Image" id="image" hidden/>
+                            <progress value="0" max="100" id="uploader">0%</progress>
+                            <input type="file" value="upload" accept=".jpg" id="fileButton" >
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="form-group">
-                        <label for="idCategories">Categories</label>
-                        <input class="form-control" placeholder="Enter a Categories" id="idCategories"/>
-                    </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="idCategories">Categories</label>
+                    <input class="form-control" placeholder="Enter a Categories" id="idCategories"/>
                 </div>
             </div>
-            <div class="row">
-                <div class="col d-flex justify-content-end">
-                    <a href="index.html" class="btn btn-primary" onclick="editCustomer()">Save Changes</a>
-                    <a href="index.html" class="btn btn-secondary">Back to list</a>
-                </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-end">
+                <a href="index.html" class="btn btn-primary" onclick="editCustomer()">Save Changes</a>
+                <a href="index.html" class="btn btn-secondary">Back to list</a>
             </div>
+        </div>
     </div>
 </div>
 </body>
 <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRUkgz07EeDqrlR93Zgaqo-_6PXOs59sA",
+        authDomain: "ducthang-ae432.firebaseapp.com",
+        databaseURL: "https://ducthang-ae432-default-rtdb.firebaseio.com",
+        projectId: "ducthang-ae432",
+        storageBucket: "ducthang-ae432.appspot.com",
+        messagingSenderId: "808201087012",
+        appId: "1:808201087012:web:72b12d3a413494610e50b1",
+        measurementId: "G-DF3E1709M4"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let imageEdit = '';
+    let fbBucketName = 'images';
+
+    let uploader = document.getElementById('uploader');
+    let fileButton = document.getElementById('fileButton');
+
+    fileButton.addEventListener('change', function (e) {
+
+        console.log('file upload event', e);
+
+        let file = e.target.files[0];
+
+        let storageRef = firebase.storage().ref(`${fbBucketName}/${file.name}`);
+
+        let uploadTask = storageRef.put(file);
+
+        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+            function (snapshot) {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                uploader.value = progress;
+                console.log('Upload is ' + progress + '% done');
+                switch (snapshot.state) {
+                    case firebase.storage.TaskState.PAUSED:
+                        console.log('Upload is paused');
+                        break;
+                    case firebase.storage.TaskState.RUNNING:
+                        console.log('Upload is running');
+                        break;
+                }
+            }, function (error) {
+                switch (error.code) {
+                    case 'storage/unauthorized':
+                        break;
+
+                    case 'storage/canceled':
+                        break;
+
+                    case 'storage/unknown':
+                        break;
+                }
+            }, function () {
+                let downloadURL = uploadTask.snapshot.downloadURL;
+                imageEdit = downloadURL;
+                console.log('downloadURL ===>', downloadURL);
+                // let divLocation = document.getElementById("imgDiv");
+                let imgElement = document.createElement("img");
+                imgElement.src = downloadURL
+                console.log('pic ==', imageEdit)
+                divLocation.append(imgElement);
+            });
+
+    });
+
     //Get cai id tren url
     let url_string = window.location.href;
     let url = new URL(url_string);
@@ -83,10 +152,14 @@
     }
 
     function editCustomer() {
+        if (imageEdit == "") {
+            imageEdit = document.getElementById("image").value;
+        }
+
         let customer = {
             id : document.getElementById("id").value,
             nameCustomer : document.getElementById("name").value,
-            image : document.getElementById("image").value,
+            image : imageEdit,
             categories : {idCategories : document.getElementById("idCategories").value}
         }
 
