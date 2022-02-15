@@ -34,6 +34,11 @@ public class CustomerController {
 //        return new ResponseEntity<>(customerService.findAllCustomer(), HttpStatus.OK);
 //    }
 
+    @GetMapping("/categories")
+    public ResponseEntity<?> showCategories() {
+        return new ResponseEntity<>(categoriesService.findAllCategories(), HttpStatus.OK);
+    }
+
     @GetMapping
     public Page<Customer> showCustomer(@RequestParam(defaultValue = "0") int page){
         return customerService.findAllCustomer(PageRequest.of(page, 3));
@@ -84,5 +89,10 @@ public class CustomerController {
     public ResponseEntity deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping("/search/{name}")
+    public ResponseEntity<?> findByName(@PathVariable("name") String name) {
+        return new ResponseEntity<>(customerService.findAllByNameCustomerContaining(name), HttpStatus.OK);
     }
 }
